@@ -1,0 +1,33 @@
+flowchart TB
+    Usuarios["<b>usuarios</b><br/>PerfilUsuario, roles,<br/>admin_required / es_admin"]
+    AuthUser[("django.contrib.auth.User")]
+
+    Academico["<b>alumnos_maestros</b><br/>Alumno, Maestro,<br/>Materia, Inscripcion"]
+    Calificaciones["<b>calificaciones</b><br/>Curso, AlumnoCurso"]
+    Horarios["<b>horarios</b><br/>Horario"]
+    Empresas["<b>empresas</b><br/>Empresa"]
+    Billetera["<b>billetera</b><br/>Movimiento"]
+    Libros["<b>libros</b><br/>Libro, Ejemplar"]
+    Prestamos["<b>prestamos</b><br/>SolicitudPrestamo, Prestamo"]
+
+    Prestamos -->|FK a Ejemplar/Libro| Libros
+    Usuarios -->|extiende vía OneToOne| AuthUser
+    Calificaciones -.->|"FK directa a User<br/>(no reutiliza Maestro/Alumno)"| AuthUser
+
+    Usuarios -.->|admin_required / es_admin| Academico
+    Usuarios -.->|admin_required / es_admin| Calificaciones
+    Usuarios -.->|admin_required / es_admin| Horarios
+    Usuarios -.->|admin_required / es_admin| Empresas
+    Usuarios -.->|admin_required / es_admin| Billetera
+    Usuarios -.->|admin_required / es_admin| Libros
+    Usuarios -.->|admin_required / es_admin| Prestamos
+
+    classDef comun fill:#1a0d02,stroke:#ff6a1f,color:#eae6da
+    classDef normal fill:#16181d,stroke:#363c46,color:#eae6da
+    classDef aislado fill:#3a1319,stroke:#ff3b4e,color:#eae6da
+    classDef core fill:#0e2f2c,stroke:#22d3c9,color:#eae6da
+
+    class Usuarios comun
+    class AuthUser core
+    class Academico,Calificaciones,Libros,Prestamos normal
+    class Horarios,Empresas,Billetera aislado

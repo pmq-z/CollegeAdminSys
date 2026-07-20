@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi perfil{% endblock %}
+
+{% block content %}
+
+<h2>Mi perfil</h2>
+
+<div class="profile-card">
+    <div class="field">
+        <span class="field-label">Usuario</span>
+        <span class="field-value">
+            {{ request.user.username }}
+        </span>
+    </div>
+
+    <div class="field">
+        <span class="field-label">Nombre</span>
+        <span class="field-value">
+            {{ request.user.first_name }} {{ request.user.last_name }}
+        </span>
+    </div>
+
+    <div class="field">
+        <span class="field-label">Correo</span>
+        <span class="field-value">
+            {{ request.user.email }}
+        </span>
+    </div>
+
+    <div class="field">
+        <span class="field-label">Teléfono</span>
+        <span class="field-value">
+            {{ perfil.telefono|default:"No registrado" }}
+        </span>
+    </div>
+
+    <div class="field">
+        <span class="field-label">Dirección</span>
+        <span class="field-value">
+            {{ perfil.direccion|default:"No registrada" }}
+        </span>
+    </div>
+
+    <div class="field">
+        <span class="field-label">Rol</span>
+        <span class="field-value">
+            {% if request.user.is_superuser %}
+                SUPERUSUARIO
+            {% elif request.user.is_staff %}
+                ADMINISTRADOR
+            {% else %}
+                {{ perfil.rol }}
+            {% endif %}
+        </span>
+    </div>
+
+    <div class="field">
+        <span class="field-label">Estado</span>
+        <span class="field-value">
+            <span class="badge {% if perfil.estado == 'ACTIVO' %}badge--ok{% else %}badge--off{% endif %}">
+                {{ perfil.estado|default:"ACTIVO" }}
+            </span>
+        </span>
+    </div>
+</div>
+
+<div class="action-row" style="margin-top: var(--sp-5);">
+    <a href="{% url 'lista_libros' %}" class="btn btn-ghost">
+        Volver a libros
+    </a>
+
+    <form action="{% url 'logout' %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary">
+            Cerrar sesión
+        </button>
+    </form>
+</div>
+
+{% endblock %}

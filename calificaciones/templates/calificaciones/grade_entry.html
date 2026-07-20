@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Captura de calificaciones — {{ curso.nombre }}{% endblock %}
+{% block page_title %}Captura: {{ curso.nombre }}{% endblock %}
+
+{% block content %}
+<div class="panel">
+    <form method="POST" action="{% url 'grade_entry' curso.id %}">
+        {% csrf_token %}
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: var(--sp-4); margin-bottom: var(--sp-5);">
+            <div style="display: flex; gap: var(--sp-6); flex-wrap: wrap;">
+                <div>
+                    <span class="u-eyebrow">Periodo</span>
+                    <p style="margin: 0; font-weight: 600;">{{ curso.periodo }}</p>
+                </div>
+                <div>
+                    <span class="u-eyebrow">Sección</span>
+                    <p class="u-mono" style="margin: 0; font-weight: 600;">{{ curso.seccion }}</p>
+                </div>
+                <div>
+                    <span class="u-eyebrow">Promedio sección</span>
+                    <p class="u-mono" style="margin: 0; font-weight: 600; color: var(--success);">{{ promedio_seccion }}</p>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <a href="{% url 'generar_pdf' curso.id %}" target="_blank" class="btn btn-secondary">Ver PDF</a>
+                <button type="submit" class="btn btn-primary" {% if curso.acta_firmada %}disabled{% endif %}>Guardar cambios</button>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Matrícula</th>
+                        <th>Nombre del estudiante</th>
+                        <th style="text-align:center;">Asistencia</th>
+                        <th style="text-align:center;">Calificación</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ac in alumnos_curso %}
+                    <tr>
+                        <td class="u-mono">{{ ac.alumno.username }}</td>
+                        <td style="font-weight: 600;">{{ ac.alumno.get_full_name }}</td>
+                        <td class="u-mono" style="text-align: center;">{{ ac.asistencia_porcentaje }}%</td>
+                        <td style="text-align: center;">
+                            <input type="number" name="cal_{{ ac.id }}" value="{{ ac.calificacion_final|default:'' }}"
+                                   style="width: 84px; text-align: center; margin: 0 auto;" min="0" max="10" step="0.1"
+                                   {% if curso.acta_firmada %}disabled{% endif %}>
+                        </td>
+                        <td>
+                            <input type="text" name="obs_{{ ac.id }}" value="{{ ac.observaciones|default:'' }}"
+                                   placeholder="Opcional..." {% if curso.acta_firmada %}disabled{% endif %}>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="empty">Aún no hay estudiantes inscritos en este curso.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: var(--sp-4); display: flex; justify-content: flex-end; text-align: right;">
+            <div>
+                <p style="font-size: 0.8rem; color: var(--ink-dim); margin: 0;">Estudiantes registrados: <b class="u-mono" style="color: var(--bone);">{{ alumnos_curso.count }}</b></p>
+                {% if curso.acta_firmada %}
+                    <p style="font-size: 0.8rem; color: var(--danger); margin: var(--sp-1) 0 0; font-weight: 700;">ACTA FIRMADA Y BLOQUEADA</p>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,132 @@
+erDiagram
+    USER ||--o| PERFILUSUARIO : "tiene"
+    USER ||--o{ CURSO : "dicta (docente)"
+    USER ||--o{ ALUMNOCURSO : "cursa (alumno)"
+    USER ||--o{ SOLICITUDPRESTAMO : "solicita"
+    USER ||--o{ PRESTAMO : "recibe"
+
+    CURSO ||--o{ ALUMNOCURSO : "inscribe"
+
+    MAESTRO ||--o{ MATERIA : "es responsable de"
+    ALUMNO ||--o{ INSCRIPCION : "se inscribe en"
+    MATERIA ||--o{ INSCRIPCION : "recibe"
+
+    LIBRO ||--o{ EJEMPLAR : "tiene"
+    LIBRO ||--o{ SOLICITUDPRESTAMO : "es referenciado en"
+    EJEMPLAR ||--o{ PRESTAMO : "es prestado en"
+    SOLICITUDPRESTAMO |o--o| PRESTAMO : "puede originar"
+
+    USER {
+        int id PK
+        string username
+        string email
+        string password
+    }
+    PERFILUSUARIO {
+        int id PK
+        int usuario_id FK
+        string telefono
+        string direccion
+        string rol
+        string estado
+    }
+    ALUMNO {
+        int id PK
+        string matricula UK
+        string nombre
+        string correo UK
+        string carrera
+        int semestre
+        string turno
+        string estatus_academico
+        bool activo
+    }
+    MAESTRO {
+        int id PK
+        string numero_empleado UK
+        string nombre
+        string correo UK
+        string especialidad
+        string estatus_laboral
+        bool activo
+    }
+    MATERIA {
+        int id PK
+        string clave UK
+        string nombre
+        int creditos
+        int cupo_maximo
+        int maestro_responsable_id FK
+        bool activa
+    }
+    INSCRIPCION {
+        int id PK
+        int alumno_id FK
+        int materia_id FK
+        string periodo_escolar
+        bool activo
+    }
+    CURSO {
+        int id PK
+        string nombre
+        string seccion
+        string periodo
+        int docente_id FK
+        bool acta_firmada
+    }
+    ALUMNOCURSO {
+        int id PK
+        int alumno_id FK
+        int curso_id FK
+        int asistencia_porcentaje
+        decimal calificacion_final
+    }
+    HORARIO {
+        int id PK
+        string dia
+        time hora_inicio
+        time hora_fin
+        bool estado
+    }
+    EMPRESA {
+        int id PK
+        string razon_social
+        string rfc UK
+        bool activa
+    }
+    MOVIMIENTO {
+        int id PK
+        string concepto
+        decimal monto
+        string tipo
+        datetime fecha
+    }
+    LIBRO {
+        int id PK
+        string titulo
+        string autor
+        string isbn UK
+        string estado
+    }
+    EJEMPLAR {
+        int id PK
+        int libro_id FK
+        string codigo_ejemplar UK
+        string estado
+        string ubicacion
+    }
+    SOLICITUDPRESTAMO {
+        int id PK
+        int usuario_id FK
+        int libro_id FK
+        string estado
+        datetime fecha_solicitud
+    }
+    PRESTAMO {
+        int id PK
+        int usuario_id FK
+        int ejemplar_id FK
+        int solicitud_id FK
+        datetime fecha_limite
+        string estado
+    }

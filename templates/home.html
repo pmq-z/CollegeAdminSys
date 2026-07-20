@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Sistema Escolar — Inicio{% endblock %}
+{% block page_title %}Inicio{% endblock %}
+
+{% block content %}
+<p class="u-eyebrow">Panel principal</p>
+<h2 style="margin-bottom: var(--sp-5);">Módulos disponibles</h2>
+
+<div class="module-grid">
+    {% for modulo in modulos %}
+    <a href="{% url modulo.url %}" class="module-card">
+        <div class="panel-bracket">
+            <h3>{{ modulo.nombre }}</h3>
+            <p>{{ modulo.descripcion }}</p>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

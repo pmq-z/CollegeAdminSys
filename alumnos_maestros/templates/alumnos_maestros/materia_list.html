@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}SCRUB - Materias{% endblock %}
+{% block page_title %}Materias{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="list-toolbar">
+        <form method="get" class="search-form">
+            <input type="search" name="q" value="{{ q }}" placeholder="Buscar por clave, nombre, carrera o maestro">
+            <button class="btn" type="submit">Buscar</button>
+        </form>
+        {% if es_admin %}
+        <a class="btn btn-primary" href="{% url 'materia_create' %}">Nueva materia</a>
+        {% endif %}
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Clave</th>
+                    <th>Nombre</th>
+                    <th>Carrera</th>
+                    <th>Semestre</th>
+                    <th>Creditos</th>
+                    <th>Cupo</th>
+                    <th>Maestro</th>
+                    <th>Activa</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for materia in materias %}
+                <tr>
+                    <td>{{ materia.clave }}</td>
+                    <td>{{ materia.nombre }}</td>
+                    <td>{{ materia.carrera }}</td>
+                    <td>{{ materia.semestre }}</td>
+                    <td>{{ materia.creditos }}</td>
+                    <td>{{ materia.cupo_maximo }}</td>
+                    <td>{{ materia.maestro_responsable.nombre }} {{ materia.maestro_responsable.apellido_paterno }}</td>
+                    <td><span class="badge {% if materia.activa %}badge-ok{% else %}badge-muted{% endif %}">{% if materia.activa %}Si{% else %}No{% endif %}</span></td>
+                    <td class="actions">
+                        {% if es_admin %}
+                        <a class="btn btn-small" href="{% url 'materia_update' materia.pk %}">Editar</a>
+                        {% if materia.activa %}
+                        <form method="post" action="{% url 'materia_deactivate' materia.pk %}">
+                            {% csrf_token %}
+                            <button class="btn btn-small btn-danger" type="submit">Desactivar</button>
+                        </form>
+                        {% endif %}
+                        {% else %}
+                        <span class="text-muted">Sin acciones</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="9" class="empty">No se encontraron materias.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

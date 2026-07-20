@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}SCRUB - Maestros{% endblock %}
+{% block page_title %}Maestros{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="list-toolbar">
+        <form method="get" class="search-form">
+            <input type="search" name="q" value="{{ q }}" placeholder="Buscar por nombre, correo o numero">
+            <button class="btn" type="submit">Buscar</button>
+        </form>
+        {% if es_admin %}
+        <a class="btn btn-primary" href="{% url 'maestro_create' %}">Nuevo maestro</a>
+        {% endif %}
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>No. empleado</th>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Area</th>
+                    <th>Especialidad</th>
+                    <th>Estatus</th>
+                    <th>Activo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for maestro in maestros %}
+                <tr>
+                    <td>{{ maestro.numero_empleado }}</td>
+                    <td>{{ maestro.nombre }} {{ maestro.apellido_paterno }} {{ maestro.apellido_materno }}</td>
+                    <td>{{ maestro.correo }}</td>
+                    <td>{{ maestro.area_academica }}</td>
+                    <td>{{ maestro.especialidad }}</td>
+                    <td><span class="badge {% if maestro.estatus_laboral == 'Activo' %}badge-ok{% elif maestro.estatus_laboral == 'Inactivo' %}badge-danger{% else %}badge-warn{% endif %}">{{ maestro.estatus_laboral }}</span></td>
+                    <td><span class="badge {% if maestro.activo %}badge-ok{% else %}badge-muted{% endif %}">{% if maestro.activo %}Si{% else %}No{% endif %}</span></td>
+                    <td class="actions">
+                        {% if es_admin %}
+                        <a class="btn btn-small" href="{% url 'maestro_update' maestro.pk %}">Editar</a>
+                        {% if maestro.activo %}
+                        <form method="post" action="{% url 'maestro_deactivate' maestro.pk %}">
+                            {% csrf_token %}
+                            <button class="btn btn-small btn-danger" type="submit">Desactivar</button>
+                        </form>
+                        {% endif %}
+                        {% else %}
+                        <span class="text-muted">Sin acciones</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="empty">No se encontraron maestros.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

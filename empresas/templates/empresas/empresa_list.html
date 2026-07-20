@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Empresas — Sistema Escolar{% endblock %}
+{% block page_title %}Empresas{% endblock %}
+
+{% block content %}
+<div class="list-toolbar">
+    <h2 style="margin: 0;">Empresas registradas</h2>
+    {% if es_admin %}
+    <a href="{% url 'empresa_create' %}" class="btn btn-primary">Nueva empresa</a>
+    {% endif %}
+</div>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Razón social</th>
+                <th>RFC</th>
+                <th>Giro</th>
+                <th>Teléfono</th>
+                <th>Correo</th>
+                <th>Estatus</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for empresa in empresas %}
+            <tr>
+                <td style="font-weight: 600;">{{ empresa.razon_social }}</td>
+                <td class="u-mono">{{ empresa.rfc }}</td>
+                <td>{{ empresa.giro }}</td>
+                <td class="u-mono">{{ empresa.telefono }}</td>
+                <td>{{ empresa.correo }}</td>
+                <td>
+                    {% if empresa.activa %}
+                        <span class="badge badge--ok">Activa</span>
+                    {% else %}
+                        <span class="badge badge--off">Inactiva</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="empty">No hay empresas registradas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

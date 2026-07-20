@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Firma de acta — {{ curso.nombre }}{% endblock %}
+{% block page_title %}Firma digital de acta académica{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 1fr 360px; gap: var(--sp-5);">
+
+    <!-- Vista previa del documento: se mantiene clara/tipo papel a propósito,
+         ya que representa el acta impresa tal como saldrá; se enmarca con la
+         firma visual del sistema para que quede claro que es una previsualización. -->
+    <div class="panel-bracket" style="display: flex; align-items: center; justify-content: center; padding: var(--sp-6);">
+        <div style="background: #f4f1e8; color: #1e293b; width: 100%; max-width: 440px; padding: var(--sp-6); font-family: Georgia, 'Times New Roman', serif; box-shadow: var(--shadow-hard);">
+            <div style="text-align: center; margin-bottom: var(--sp-5);">
+                <h2 style="font-size: 1.1rem; text-transform: uppercase; margin: 0; color: #1e293b; letter-spacing: 0.04em;">Acta de calificaciones</h2>
+                <p style="font-size: 0.85rem; margin: var(--sp-1) 0 0;">Institución de excelencia educativa</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2) var(--sp-4); font-size: 0.8rem; margin-bottom: var(--sp-4);">
+                <p style="margin: 0;"><b>Asignatura:</b> {{ curso.nombre }}</p>
+                <p style="margin: 0;"><b>Sección:</b> {{ curso.seccion }}</p>
+                <p style="margin: 0;"><b>Periodo:</b> {{ curso.periodo }}</p>
+                <p style="margin: 0;"><b>Docente:</b> {{ curso.docente.get_full_name }}</p>
+            </div>
+
+            <div style="height: 140px; background: #e9e5d8; border: 1px dashed #b8b2a0; display: flex; align-items: center; justify-content: center; font-family: var(--font-body); font-size: 0.75rem; color: #7c7666;">
+                Vista previa de calificaciones omitida para este resumen
+            </div>
+
+            <p style="margin-top: var(--sp-5); font-size: 0.7rem; color: #7c7666; text-align: center;">
+                Este documento es una representación digital pendiente de firma.
+            </p>
+        </div>
+    </div>
+
+    <!-- Panel funcional de firma -->
+    <div style="display: flex; flex-direction: column; gap: var(--sp-5);">
+        <div class="card" style="margin-bottom: 0;">
+            <h3 style="margin-bottom: var(--sp-2);">Panel de firma</h3>
+            <p style="font-size: 0.85rem; color: var(--ink-dim); margin-bottom: var(--sp-4);">
+                Trazá tu rúbrica como confirmación y completá la doble validación para cerrar el acta.
+            </p>
+
+            <form method="POST" action="{% url 'digital_signature' curso.id %}">
+                {% csrf_token %}
+
+                {% if error %}
+                    <div class="form-errors">{{ error }}</div>
+                {% endif %}
+
+                <div style="border: var(--border) solid var(--line); background: var(--paper-raised); height: 130px; margin-bottom: var(--sp-4); position: relative;">
+                    <canvas id="firmaCanvas" style="position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair;"></canvas>
+                    <p id="firmaPlaceholder" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--ink-faint); font-size: 0.8rem; margin: 0; pointer-events: none;">Trazá tu rúbrica aquí</p>
+                </div>
+
+                <label for="id_codigo_sms">1. Código de correo institucional</label>
+                <input type="text" id="id_codigo_sms" name="codigo_sms" placeholder="123456" required
+                       style="text-align: center; letter-spacing: 0.2em;">
+
+                <label for="id_pin">2. Contraseña de tu cuenta</label>
+                <input type="password" id="id_pin" name="pin" placeholder="••••••••" required
+                       style="text-align: center; letter-spacing: 0.2em;">
+                <p style="font-size: 0.72rem; color: var(--ink-faint); margin: calc(var(--sp-3) * -1) 0 var(--sp-4);">
+                    Es la contraseña con la que iniciás sesión: valida que sos vos quien firma.
+                </p>
+
+                <div class="form-actions" style="margin-top: 0;">
+                    <button type="button" id="btnLimpiarFirma" class="btn btn-ghost" style="flex: 1;">Limpiar</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 2;">Firmar acta</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card" style="margin-bottom: 0; border-color: var(--success);">
+            <div style="display: flex; gap: var(--sp-3); align-items: center; color: var(--success);">
+                <span style="width: 10px; height: 10px; border-radius: var(--radius-dot); background: var(--success); flex-shrink: 0;"></span>
+                <p style="font-weight: 700; margin: 0;">Cierre seguro</p>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--ink-dim); margin: var(--sp-2) 0 0;">
+                Una vez firmada, el acta queda bloqueada para futuras ediciones y se envía a servicios escolares.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Firma dibujada a mano alzada como gesto de confirmación. La autenticación
+    // real de la acción es el código de correo + la contraseña de la cuenta
+    // (ver calificaciones/views.py); el trazo no se envía ni se guarda.
+    (function () {
+        var canvas = document.getElementById('firmaCanvas');
+        var placeholder = document.getElementById('firmaPlaceholder');
+        var ctx = canvas.getContext('2d');
+        var dibujando = false;
+
+        function ajustarTamano() {
+            var rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+        ajustarTamano();
+        window.addEventListener('resize', ajustarTamano);
+
+        function coordenadas(evento) {
+            var rect = canvas.getBoundingClientRect();
+            var punto = evento.touches ? evento.touches[0] : evento;
+            return { x: punto.clientX - rect.left, y: punto.clientY - rect.top };
+        }
+
+        function iniciar(evento) {
+            dibujando = true;
+            placeholder.style.display = 'none';
+            var p = coordenadas(evento);
+            ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim();
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+        }
+        function trazar(evento) {
+            if (!dibujando) return;
+            var p = coordenadas(evento);
+            ctx.lineTo(p.x, p.y);
+            ctx.stroke();
+            evento.preventDefault();
+        }
+        function terminar() { dibujando = false; }
+
+        canvas.addEventListener('mousedown', iniciar);
+        canvas.addEventListener('mousemove', trazar);
+        window.addEventListener('mouseup', terminar);
+        canvas.addEventListener('touchstart', iniciar);
+        canvas.addEventListener('touchmove', trazar);
+        window.addEventListener('touchend', terminar);
+
+        document.getElementById('btnLimpiarFirma').addEventListener('click', function () {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            placeholder.style.display = 'flex';
+        });
+    })();
+</script>
+{% endblock %}

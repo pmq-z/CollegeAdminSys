@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Solicitudes de préstamo{% endblock %}
+{% block page_title %}Solicitudes de préstamo{% endblock %}
+
+{% block content %}
+
+{% if es_admin %}
+    <div class="action-row" style="margin-bottom: var(--sp-4);">
+        <a href="{% url 'registrar_prestamo' %}" class="btn btn-secondary">
+            Registrar préstamo directo
+        </a>
+
+        <a href="{% url 'prestamos_activos' %}" class="btn btn-secondary">
+            Ver préstamos activos
+        </a>
+    </div>
+{% endif %}
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Libro</th>
+                <th>Estado</th>
+                <th>Fecha de solicitud</th>
+                <th>Observaciones</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for solicitud in solicitudes %}
+                <tr>
+                    <td data-label="Usuario" class="u-mono">
+                        {{ solicitud.usuario.username }}
+                    </td>
+
+                    <td data-label="Libro" style="font-weight: 600;">
+                        {{ solicitud.libro.titulo }}
+                    </td>
+
+                    <td data-label="Estado">
+                        <span class="badge
+                            {% if solicitud.estado == 'PENDIENTE' %}
+                                badge--pending
+                            {% elif solicitud.estado == 'APROBADA' %}
+                                badge--ok
+                            {% elif solicitud.estado == 'RECHAZADA' %}
+                                badge--danger
+                            {% else %}
+                                badge--off
+                            {% endif %}
+                        ">
+                            {{ solicitud.estado }}
+                        </span>
+                    </td>
+
+                    <td data-label="Fecha de solicitud" class="u-mono">
+                        {{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}
+                    </td>
+
+                    <td data-label="Observaciones">
+                        {{ solicitud.observaciones|default:"Sin observaciones" }}
+                    </td>
+
+                    <td data-label="Acciones" class="actions">
+                        {% if solicitud.estado == 'PENDIENTE' and es_admin %}
+                            <form method="post" action="{% url 'aprobar_solicitud' solicitud.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-sm">Aprobar</button>
+                            </form>
+                            <form method="post" action="{% url 'rechazar_solicitud' solicitud.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--danger);">Rechazar</button>
+                            </form>
+                        {% else %}
+                            <span style="color: var(--ink-faint);">Sin acciones</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6" class="empty">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h11"/></svg>
+                            <p>No hay solicitudes registradas.</p>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

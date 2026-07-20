@@ -1,0 +1,36 @@
+sequenceDiagram
+    actor U as Usuario
+    participant N as Nginx
+    participant D as Django (auth_views.LoginView)
+    participant DB as PostgreSQL
+    participant R as Redis (sesión)
+
+    U->>N: GET /login/
+    N->>D: proxy_pass
+    D-->>U: formulario de login
+
+    U->>N: POST /login/ (usuario, contraseña)
+    N->>D: proxy_pass
+    D->>DB: AuthenticationForm valida credenciales
+    DB-->>D: usuario válido
+
+    alt credenciales correctas
+        D->>R: crea sesión (cached_db: cache + BD)
+        D-->>U: 302 → redirige a /home/ + cookie de sesión
+    else credenciales incorrectas
+        D-->>U: 200 formulario con error genérico
+        note over D,U: no distingue "usuario no existe" de<br/>"contraseña incorrecta" (evita enumeración)
+    end
+
+    U->>N: GET /academico/alumnos/nuevo/ (con cookie)
+    N->>D: proxy_pass
+    D->>R: recupera sesión
+    R-->>D: usuario autenticado
+
+    D->>D: admin_required verifica<br/>PerfilUsuario.rol == 'ADMIN'
+
+    alt es administrador
+        D-->>U: 200 formulario de alta
+    else no es administrador
+        D-->>U: 302 → redirige con mensaje de error
+    end

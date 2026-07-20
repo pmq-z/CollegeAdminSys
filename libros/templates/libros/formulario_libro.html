@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="card form-panel">
+    <form method="post">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="form-errors">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="data-form">
+            <div class="form-group">
+                <label>Título</label>
+                {{ form.titulo }}
+                {% for error in form.titulo.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+            <div class="form-group">
+                <label>Autor</label>
+                {{ form.autor }}
+            </div>
+            <div class="form-group">
+                <label>Editorial</label>
+                {{ form.editorial }}
+            </div>
+            <div class="form-group">
+                <label>Año de publicación</label>
+                {{ form.anio_publicacion }}
+                {% for error in form.anio_publicacion.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+            <div class="form-group">
+                <label>Categoría</label>
+                {{ form.categoria }}
+            </div>
+            <div class="form-group">
+                <label>ISBN</label>
+                {{ form.isbn }}
+                {% for error in form.isbn.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+            <div class="form-group">
+                <label>Estado</label>
+                {{ form.estado }}
+            </div>
+            <div class="form-group">
+                <label>Descripción</label>
+                {{ form.descripcion }}
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="{% url 'lista_libros' %}" class="btn btn-ghost">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

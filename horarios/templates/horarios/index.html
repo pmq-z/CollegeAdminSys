@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}Horarios — Sistema Escolar{% endblock %}
+{% block page_title %}Horarios{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <article class="stat-card">
+        <span>Total horarios</span>
+        <strong>{{ total }}</strong>
+    </article>
+    <article class="stat-card">
+        <span>Activos</span>
+        <strong style="color: var(--success);">{{ activos }}</strong>
+    </article>
+    <article class="stat-card">
+        <span>Inactivos</span>
+        <strong style="color: var(--danger);">{{ inactivos }}</strong>
+    </article>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr); gap: var(--sp-4); align-items: start;">
+
+    {% if es_admin %}
+    <div class="panel">
+        <div class="panel-header"><h2>Registrar horario</h2></div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="form-errors">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label>Día</label>
+                {{ form.dia }}
+            </div>
+            <div class="form-group">
+                <label>Hora de inicio</label>
+                {{ form.hora_inicio }}
+            </div>
+            <div class="form-group">
+                <label>Hora de finalización</label>
+                {{ form.hora_fin }}
+            </div>
+            <div class="form-check">
+                {{ form.estado }}
+                <label>Horario activo</label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Guardar horario</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <div class="panel">
+        <div class="panel-header"><h2>Horarios registrados</h2></div>
+
+        <input type="text" id="buscar" placeholder="Buscar por día..." style="max-width: 320px;">
+
+        <div class="table-wrap">
+            <table id="tablaHorarios">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Día</th>
+                        <th>Hora inicio</th>
+                        <th>Hora fin</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for horario in horarios %}
+                    <tr>
+                        <td class="u-mono">{{ horario.id }}</td>
+                        <td style="font-weight: 600;">{{ horario.dia }}</td>
+                        <td class="u-mono">{{ horario.hora_inicio|time:"H:i" }}</td>
+                        <td class="u-mono">{{ horario.hora_fin|time:"H:i" }}</td>
+                        <td>
+                            {% if horario.estado %}
+                                <span class="badge badge--ok">Activo</span>
+                            {% else %}
+                                <span class="badge badge--danger">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td class="actions">
+                            {% if es_admin %}
+                                <a href="{% url 'editar' horario.id %}" class="btn btn-ghost btn-sm">Editar</a>
+                                <button type="button" class="btn btn-danger btn-sm btnEliminar" data-id="{{ horario.id }}" data-dia="{{ horario.dia }}">Eliminar</button>
+                            {% else %}
+                                <span style="color: var(--ink-faint);">Sin acciones</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty">No existen horarios registrados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmación de borrado: <dialog> nativo, sin dependencia de JS de Bootstrap -->
+<dialog id="modalEliminar" style="border: var(--border) solid var(--danger); background: var(--panel); color: var(--bone); padding: var(--sp-5); max-width: 380px; width: 90%;">
+    <h3 style="color: var(--danger); margin-bottom: var(--sp-3);">Eliminar horario</h3>
+    <p style="margin-bottom: var(--sp-2);">Día: <strong id="diaEliminar" class="u-mono"></strong></p>
+    <p style="color: var(--ink-dim); font-size: 0.85rem;">Esta acción no podrá deshacerse.</p>
+
+    <form id="formEliminar" method="post" action="#">
+        {% csrf_token %}
+        <div class="form-actions">
+            <button type="button" class="btn btn-ghost" id="btnCancelarEliminar">Cancelar</button>
+            <button type="submit" class="btn btn-danger">Eliminar</button>
+        </div>
+    </form>
+</dialog>
+
+<script>
+    // Filtro de búsqueda en vivo, sin dependencias externas.
+    document.getElementById('buscar').addEventListener('keyup', function () {
+        var filtro = this.value.toLowerCase();
+        document.querySelectorAll('#tablaHorarios tbody tr').forEach(function (fila) {
+            fila.style.display = fila.innerText.toLowerCase().indexOf(filtro) > -1 ? '' : 'none';
+        });
+    });
+
+    // Modal de confirmación con <dialog> nativo (reemplaza el modal de Bootstrap).
+    var modal = document.getElementById('modalEliminar');
+    document.querySelectorAll('.btnEliminar').forEach(function (boton) {
+        boton.addEventListener('click', function () {
+            document.getElementById('diaEliminar').innerText = this.dataset.dia;
+            document.getElementById('formEliminar').action = '/horarios/eliminar/' + this.dataset.id + '/';
+            modal.showModal();
+        });
+    });
+    document.getElementById('btnCancelarEliminar').addEventListener('click', function () {
+        modal.close();
+    });
+</script>
+{% endblock %}

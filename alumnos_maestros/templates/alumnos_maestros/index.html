@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Sistema Escolar — Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="dashboard-grid">
+    <article class="stat-card">
+        <span>Alumnos</span>
+        <strong>{{ total_alumnos }}</strong>
+        <small>activos</small>
+    </article>
+    <article class="stat-card">
+        <span>Maestros</span>
+        <strong>{{ total_maestros }}</strong>
+        <small>activos</small>
+    </article>
+    <article class="stat-card">
+        <span>Materias</span>
+        <strong>{{ total_materias }}</strong>
+        <small>activas</small>
+    </article>
+    <article class="stat-card">
+        <span>Inscripciones</span>
+        <strong>{{ total_inscripciones }}</strong>
+        <small>activas</small>
+    </article>
+</section>
+
+<section class="content-grid">
+    <div class="panel">
+        <div class="panel-header">
+            <h2>Alumnos recientes</h2>
+            <a class="btn btn-small" href="{% url 'alumno_list' %}">Ver todos</a>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Matricula</th>
+                        <th>Nombre</th>
+                        <th>Carrera</th>
+                        <th>Grupo</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alumno in alumnos_recientes %}
+                    <tr>
+                        <td>{{ alumno.matricula }}</td>
+                        <td>{{ alumno.nombre }} {{ alumno.apellido_paterno }}</td>
+                        <td>{{ alumno.carrera }}</td>
+                        <td>{{ alumno.semestre }}-{{ alumno.grupo }}</td>
+                        <td><span class="badge badge-ok">{{ alumno.estatus_academico }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="empty">Aun no hay alumnos registrados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel quick-panel">
+        <h2>Accesos rapidos</h2>
+        {% if es_admin %}
+        <div class="quick-actions">
+            <a href="{% url 'alumno_create' %}">Nuevo alumno</a>
+            <a href="{% url 'maestro_create' %}">Nuevo maestro</a>
+            <a href="{% url 'materia_create' %}">Nueva materia</a>
+            <a href="{% url 'inscripcion_create' %}">Nueva inscripcion</a>
+            <a href="/admin/">Admin Django</a>
+        </div>
+        {% else %}
+        <p style="color: var(--ink-faint); font-size: 0.85rem;">Consultá con un administrador para dar de alta nuevos registros.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

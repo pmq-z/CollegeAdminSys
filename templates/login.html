@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar sesión — Sistema Escolar{% endblock %}
+
+{% block auth_content %}
+<div class="panel-bracket" style="width: 100%; max-width: 380px;">
+    <div style="text-align: center; margin-bottom: var(--sp-5);">
+        <span class="sidebar-brand__mark" style="margin: 0 auto var(--sp-3); display: flex;">{% include '_brand_mark.html' %}</span>
+        <h1 style="font-size: 1.1rem; margin-bottom: var(--sp-1);">Sistema Escolar</h1>
+        <p class="u-eyebrow" style="margin: 0;">Ingresá para acceder a los módulos</p>
+    </div>
+
+    {% if form.errors %}
+        <div class="form-errors">Usuario o contraseña incorrectos.</div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <label for="id_username">Usuario</label>
+        {{ form.username }}
+        <label for="id_password">Contraseña</label>
+        {{ form.password }}
+        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+    </form>
+
+    <p style="text-align: center; margin: var(--sp-4) 0 0; font-size: 0.85rem;">
+        ¿No tenés cuenta? <a href="{% url 'registro_usuario' %}">Registrate</a>
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}SCRUB - Alumnos{% endblock %}
+{% block page_title %}Alumnos{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="list-toolbar">
+        <form method="get" class="search-form">
+            <input type="search" name="q" value="{{ q }}" placeholder="Buscar por nombre, correo o matricula">
+            <button class="btn" type="submit">Buscar</button>
+        </form>
+        {% if es_admin %}
+        <a class="btn btn-primary" href="{% url 'alumno_create' %}">Nuevo alumno</a>
+        {% endif %}
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Matricula</th>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Carrera</th>
+                    <th>Semestre</th>
+                    <th>Grupo</th>
+                    <th>Estatus</th>
+                    <th>Activo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for alumno in alumnos %}
+                <tr>
+                    <td>{{ alumno.matricula }}</td>
+                    <td>{{ alumno.nombre }} {{ alumno.apellido_paterno }} {{ alumno.apellido_materno }}</td>
+                    <td>{{ alumno.correo }}</td>
+                    <td>{{ alumno.carrera }}</td>
+                    <td>{{ alumno.semestre }}</td>
+                    <td>{{ alumno.grupo }}</td>
+                    <td><span class="badge {% if alumno.estatus_academico == 'Activo' %}badge-ok{% elif alumno.estatus_academico == 'Baja definitiva' %}badge-danger{% else %}badge-warn{% endif %}">{{ alumno.estatus_academico }}</span></td>
+                    <td><span class="badge {% if alumno.activo %}badge-ok{% else %}badge-muted{% endif %}">{% if alumno.activo %}Si{% else %}No{% endif %}</span></td>
+                    <td class="actions">
+                        {% if es_admin %}
+                        <a class="btn btn-small" href="{% url 'alumno_update' alumno.pk %}">Editar</a>
+                        {% if alumno.activo %}
+                        <form method="post" action="{% url 'alumno_deactivate' alumno.pk %}">
+                            {% csrf_token %}
+                            <button class="btn btn-small btn-danger" type="submit">Desactivar</button>
+                        </form>
+                        {% endif %}
+                        {% else %}
+                        <span class="text-muted">Sin acciones</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="9" class="empty">No se encontraron alumnos.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

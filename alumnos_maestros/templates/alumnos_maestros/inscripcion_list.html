@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}SCRUB - Inscripciones{% endblock %}
+{% block page_title %}Inscripciones{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="list-toolbar">
+        <form method="get" class="search-form">
+            <input type="search" name="q" value="{{ q }}" placeholder="Buscar por alumno, materia o periodo">
+            <button class="btn" type="submit">Buscar</button>
+        </form>
+        {% if es_admin %}
+        <a class="btn btn-primary" href="{% url 'inscripcion_create' %}">Nueva inscripcion</a>
+        {% endif %}
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Alumno</th>
+                    <th>Materia</th>
+                    <th>Periodo</th>
+                    <th>Fecha</th>
+                    <th>Activo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inscripcion in inscripciones %}
+                <tr>
+                    <td>{{ inscripcion.alumno.matricula }} - {{ inscripcion.alumno.nombre }} {{ inscripcion.alumno.apellido_paterno }}</td>
+                    <td>{{ inscripcion.materia.clave }} - {{ inscripcion.materia.nombre }}</td>
+                    <td>{{ inscripcion.periodo_escolar }}</td>
+                    <td>{{ inscripcion.fecha_inscripcion|date:"d/m/Y H:i" }}</td>
+                    <td><span class="badge {% if inscripcion.activo %}badge-ok{% else %}badge-muted{% endif %}">{% if inscripcion.activo %}Si{% else %}No{% endif %}</span></td>
+                    <td class="actions">
+                        {% if es_admin and inscripcion.activo %}
+                        <form method="post" action="{% url 'inscripcion_deactivate' inscripcion.pk %}">
+                            {% csrf_token %}
+                            <button class="btn btn-small btn-danger" type="submit">Desactivar</button>
+                        </form>
+                        {% elif not es_admin %}
+                        <span class="text-muted">Sin acciones</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="empty">No se encontraron inscripciones.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

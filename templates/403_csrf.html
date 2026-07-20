@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es-mx">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sesión expirada — Sistema Escolar</title>
+    <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
+</head>
+<body>
+<div class="auth-shell">
+    <div class="panel-bracket" style="max-width: 440px; text-align: center;">
+        <span class="u-eyebrow" style="color: var(--warn);">Formulario expirado</span>
+        <h1 style="font-size: 1.4rem; margin-bottom: var(--sp-3);">Tu sesión ya no es válida</h1>
+        <p style="color: var(--ink-dim); margin-bottom: var(--sp-5);">
+            Esto suele pasar cuando un formulario queda abierto demasiado tiempo. Volvé a iniciar sesión e intentá de nuevo.
+        </p>
+        <a href="{% url 'login' %}" class="btn btn-primary">Iniciar sesión</a>
+    </div>
+</div>
+</body>
+</html>

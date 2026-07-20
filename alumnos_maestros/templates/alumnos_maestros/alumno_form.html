@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}SCRUB - {{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<section class="panel form-panel">
+    {% include 'alumnos_maestros/form_errors.html' %}
+    <form method="post" class="data-form">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group {% if field.field.widget.input_type == 'checkbox' %}checkbox-row{% endif %}">
+                {{ field.label_tag }}
+                {{ field }}
+                {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+        {% endfor %}
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Guardar</button>
+            <a class="btn" href="{% url 'alumno_list' %}">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

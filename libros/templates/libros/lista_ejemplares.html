@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de ejemplares{% endblock %}
+{% block page_title %}Ejemplares{% endblock %}
+
+{% block content %}
+
+<div class="list-toolbar">
+    <h2 style="margin: 0;">Ejemplares registrados</h2>
+    {% if es_admin %}
+        <a href="{% url 'crear_ejemplar' %}" class="btn btn-primary">Registrar nuevo ejemplar</a>
+    {% endif %}
+</div>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Libro</th>
+                <th>Estado</th>
+                <th>Ubicación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for ejemplar in ejemplares %}
+                <tr>
+                    <td data-label="Código" class="u-mono">
+                        {{ ejemplar.codigo_ejemplar }}
+                    </td>
+
+                    <td data-label="Libro" style="font-weight: 600;">
+                        {{ ejemplar.libro.titulo }}
+                    </td>
+
+                    <td data-label="Estado">
+                        <span class="badge
+                            {% if ejemplar.estado == 'DISPONIBLE' %}
+                                badge--ok
+                            {% elif ejemplar.estado == 'PRESTADO' %}
+                                badge--pending
+                            {% elif ejemplar.estado == 'DAÑADO' %}
+                                badge--danger
+                            {% else %}
+                                badge--off
+                            {% endif %}
+                        ">
+                            {{ ejemplar.estado }}
+                        </span>
+                    </td>
+
+                    <td data-label="Ubicación">
+                        {{ ejemplar.ubicacion }}
+                    </td>
+
+                    <td data-label="Acciones" class="actions">
+                        {% if es_admin %}
+                            <a href="{% url 'editar_ejemplar' ejemplar.id %}" class="btn btn-ghost btn-sm">
+                                Editar
+                            </a>
+                            <form method="post" action="{% url 'eliminar_ejemplar' ejemplar.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--danger);">Dar de baja</button>
+                            </form>
+                        {% else %}
+                            <span style="color: var(--ink-faint);">Sin acciones</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="empty">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                            <p>Todavía no hay ejemplares registrados.</p>
+                            {% if es_admin %}<a href="{% url 'crear_ejemplar' %}" class="btn btn-primary btn-sm">Registrar el primero</a>{% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

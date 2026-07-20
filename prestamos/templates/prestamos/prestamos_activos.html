@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Préstamos activos{% endblock %}
+{% block page_title %}Préstamos activos{% endblock %}
+
+{% block content %}
+
+{% if es_admin %}
+    <div class="action-row" style="margin-bottom: var(--sp-4);">
+        <a href="{% url 'registrar_prestamo' %}" class="btn btn-secondary">
+            Registrar préstamo directo
+        </a>
+
+        <a href="{% url 'lista_solicitudes' %}" class="btn btn-secondary">
+            Ver solicitudes
+        </a>
+    </div>
+{% endif %}
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Libro</th>
+                <th>Ejemplar</th>
+                <th>Fecha préstamo</th>
+                <th>Fecha límite</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for prestamo in prestamos %}
+                <tr>
+                    <td data-label="Usuario" class="u-mono">
+                        {{ prestamo.usuario.username }}
+                    </td>
+
+                    <td data-label="Libro" style="font-weight: 600;">
+                        {{ prestamo.ejemplar.libro.titulo }}
+                    </td>
+
+                    <td data-label="Ejemplar" class="u-mono">
+                        {{ prestamo.ejemplar.codigo_ejemplar }}
+                    </td>
+
+                    <td data-label="Fecha préstamo" class="u-mono">
+                        {{ prestamo.fecha_prestamo|date:"d/m/Y H:i" }}
+                    </td>
+
+                    <td data-label="Fecha límite" class="u-mono">
+                        {{ prestamo.fecha_limite|date:"d/m/Y H:i" }}
+                    </td>
+
+                    <td data-label="Estado">
+                        <span class="badge
+                            {% if prestamo.estado == 'ACTIVO' %}
+                                badge--pending
+                            {% elif prestamo.estado == 'DEVUELTO' %}
+                                badge--ok
+                            {% else %}
+                                badge--danger
+                            {% endif %}
+                        ">
+                            {{ prestamo.estado }}
+                        </span>
+                    </td>
+
+                    <td data-label="Acciones" class="actions">
+                        {% if es_admin %}
+                            <form method="post" action="{% url 'registrar_devolucion' prestamo.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-sm">Registrar devolución</button>
+                            </form>
+                        {% else %}
+                            <span style="color: var(--ink-faint);">Sin acciones</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" class="empty">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                            <p>No hay préstamos activos.</p>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

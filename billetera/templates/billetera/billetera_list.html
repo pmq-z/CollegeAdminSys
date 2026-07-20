@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Billetera — Sistema Escolar{% endblock %}
+{% block page_title %}Billetera{% endblock %}
+
+{% block content %}
+<div class="panel-bracket" style="max-width: 320px; margin-bottom: var(--sp-5); text-align: center;">
+    <span class="u-eyebrow">Saldo actual</span>
+    <strong class="u-mono" style="display:block; font-size: 2.25rem; color: {% if saldo < 0 %}var(--danger){% else %}var(--success){% endif %};">
+        ${{ saldo }}
+    </strong>
+</div>
+
+<div class="list-toolbar">
+    <h2 style="margin: 0;">Movimientos</h2>
+    {% if es_admin %}
+    <a href="{% url 'movimiento_create' %}" class="btn btn-primary">Nuevo movimiento</a>
+    {% endif %}
+</div>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Concepto</th>
+                <th>Tipo</th>
+                <th>Monto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for movimiento in movimientos %}
+            <tr>
+                <td class="u-mono">{{ movimiento.fecha|date:"d/m/Y H:i" }}</td>
+                <td>{{ movimiento.concepto }}</td>
+                <td>
+                    {% if movimiento.tipo == 'Ingreso' %}
+                        <span class="badge badge--ok">Ingreso</span>
+                    {% else %}
+                        <span class="badge badge--danger">Egreso</span>
+                    {% endif %}
+                </td>
+                <td class="u-mono">${{ movimiento.monto }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="empty">No hay movimientos registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
